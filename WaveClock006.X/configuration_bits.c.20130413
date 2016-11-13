@@ -1,0 +1,61 @@
+/******************************************************************************/
+/* Files to Include                                                           */
+/******************************************************************************/
+
+#ifdef __XC32
+    #include <xc.h>          /* Defines special funciton registers, CP0 regs  */
+#endif
+
+#include <plib.h>            /* Include to use PIC32 peripheral libraries     */
+
+/******************************************************************************/
+/* Configuration Bits                                                         */
+/*                                                                            */
+/* Refer to 'C32 Configuration Settings' under the Help > Contents            */
+/* > C32 Toolchain in MPLAB X IDE for available C32 PIC32 Configurations. For */
+/* additional information about what the hardware configurations mean in      */
+/* terms of device operation, refer to the device datasheet 'Special Features'*/
+/* chapter. XC32 documentation is available under Help > Contents >           */
+/* XC32 C Compiler.                                                           */
+/*                                                                            */
+/* A feature of MPLAB X is the 'Generate Source Code to Output' utility in    */
+/* the Configuration Bits window.  Under Window > PIC Memory Views >          */
+/* Configuration Bits, a user controllable configuration bits window is       */
+/* available to Generate Configuration Bits source code which the user can    */
+/* paste into this project.                                                   */
+/******************************************************************************/
+
+/* TODO Fill in your configuration bits from the config bits generator here.  */
+#pragma config PMDL1WAY  = OFF		//Peripheral Module Disable Configuration:Allow multiple reconfigurations
+#pragma config IOL1WAY   = OFF		//Peripheral Pin Select Configuration:Allow multiple reconfigurations
+#pragma config FUSBIDIO  = OFF		//USB USID Selection:Controlled by Port Function
+#pragma config FVBUSONIO = OFF		//USB VBUS ON Selection:Controlled by Port Function
+//#pragma config FPLLIDIV= DIV_1	//PLL Input Divider:1x Divider (DIV_1,DIV_2,DIV_3,DIV_4,DIV_5,DIV_6,DIV_10,DIV_12)
+#pragma config FPLLIDIV  = DIV_2
+//#pragma config FPLLMUL = MUL_15	//PLL Multiplier:15x Multiplier(MUL_15,MUL_16,MUL_17,MUL_18,MUL_19,MUL_20,MUL_21,MUL_24)
+#pragma config FPLLMUL   = MUL_20
+//#pragma config FPLLODIV= DIV_1	//System PLL Output Clock Divider:PLL Divide by 1(DIV_1,DIV_2,DIV_4,DIV_8,DIV_16,DIV_32,DIV_64,DIV_256)
+#pragma config UPLLIDIV  = DIV_2		//USB PLL Input Divider:
+#pragma config UPLLEN	 = ON			//USB PLL Enable:
+#pragma config FPLLODIV  = DIV_2		//System PLL Output Clock Divider:
+//#pragma config FNOSC   = FRC		//Oscillator Selection Bits:Fast RC Osc (FRC) (FRC,FRCPLL,PRI,PRIPLL,SOSC,LPRC,FRCDIV16,FRCDIV)
+#pragma config FNOSC     = FRCPLL
+#pragma config FSOSCEN   = OFF		//Secondary Oscillator Enable:Disabled
+#pragma config IESO      = OFF		//Internal/External Switch Over:Disabled
+#pragma config POSCMOD   = OFF		//Primary Oscillator Configuration:Primary osc disabled (EC,XT,HS,OFF)
+#pragma config OSCIOFNC  = OFF		//CLKO Output Signal Active on the OSCO Pin::Disabled
+#pragma config FPBDIV    = DIV_1	//Peripheral Clock Divisor:Pb_Clk is Sys_Clk/1 (DIV_1,DIV_2,DIV_4,DIV_8)
+#pragma config FCKSM     = CSDCMD	//Clock Switching and Monitor Selection:Clock Switch Disable, FSCM Disabled (CSECME,CSECMD,CSDCMD)
+#pragma config WDTPS     = PS1		//Watchdog Timer Postscaler:1:1 (PS1,,,,PS1048576)
+#pragma config WINDIS    = OFF		//Watchdog Timer Window Enable:Watchdog Timer is in Non-Window Mode
+#pragma config FWDTEN    = OFF		//Watchdog Timer Enable:WDT Disabled (SWDTEN Bit Controls)
+#pragma config FWDTWINSZ = WINSZ_50	//Watchdog Timer Window Size:Window Size is 50% (WINSZ_75,WINSZ_50,WINSZ_37,WISZ_25)
+#pragma config DEBUG     = ON		//Background Debugger Enable:Debugger is Disabled
+#pragma config JTAGEN    = OFF		//JTAG Enable:JTAG Disabled
+#pragma config ICESEL	 = ICS_PGx2	//ICE/ICD Comm Channel Select:Reserved (RESERVED,ICS_PGx3,ICS_PGx2,ICS_PGx1)
+#pragma config PWP       = OFF		//Program Flash Write Protect:
+#pragma config BWP       = OFF		//Boot Flash Write Protect bit:
+#pragma config CP        = OFF		//Code Protect:
+
+
+
