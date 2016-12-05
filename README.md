@@ -13,8 +13,7 @@ References.
 
 I created this project using the free versions of the following tools:
  * [Microchip MPLAB X][2] (v3.35)
- * [Microchip XC32 Compiler][3] (v1.4)
- * [MPLAB Harmony Configurator][4] (v1.0.8.7)
+ * [Microchip XC32 Compiler][3] (v1.3)
  * [EAGLE][6] (v4.0.1)
 
 You will need to download and install these tools appropriately before you
