@@ -21,8 +21,10 @@
 #include "vERROR_CODE.h"
 #include "vWave_lib.h"
 
-#define LED0	LATBbits.LATB11 //Min routin check blink!
-#define LED1	LATBbits.LATB12 //Min routin check blink!
+//#define LED0	LATBbits.LATB11 //Main routin check blink!
+//#define LED1	LATBbits.LATB12 //Main routin check blink!
+#define MOTOR_RIN	LATBbits.LATB11 //motor reverse
+#define MOTOR_FIN	LATBbits.LATB12 //motor foward
 
 
 /*****************************
@@ -85,8 +87,10 @@ void __ISR(_CHANGE_NOTICE_VECTOR, ipl1) Intrupt_CN(void)
 
 //	LED0 = ~LED0;
 //	LED1 = ~LED0;
-	LED0 = 0;
-	LED1 = 1;
+//	LED0 = 0;
+//	LED1 = 1;
+    MOTOR_RIN = 0;  // RIN=Low & FIN=Low => Motor idle 
+    MOTOR_FIN = 0;
 
 }
 
@@ -316,14 +320,8 @@ char cSW4_ON(void)
 //******************************************************************************
 void vModeSwitchControl00(void)
 {
-	if (cSW4_ON()){
-		vWAVE_close();				//stop WAVE playing
-		CloseTimer4();				//stop SD card reading
-		eModeSwitchStatus1 = eModeS1_clock;
-	}
 	switch (eModeSwitchStatus1) {
 	case  	eModeS1_clock :		//時刻表示処理
-		//★★ここに時間設定表示処理を入れる
 		vGetsRTCC();						// RTCCモジュールから日付時間を取得する。
 		eModeLcdL1Status = eModeL1_TimeOut;	//一定時間間隔起動
 		eModeLcdL2Status = eModeL2_DateOut;	//一定時間間隔起動
@@ -332,18 +330,17 @@ void vModeSwitchControl00(void)
 		if(cSW2_ON()){
 			vSpeakTimeMessage();
 		}
-
-		//vPowerSave();
 		break;
 
 	case	eModeS1_ModeSelect_pre:
-
 		iSelectNo01 = eModeS1_ModeSelect_jmp_wave_play;
 		eModeSwitchStatus1++;
 		break;
 
 	case	eModeS1_ModeSelect:
+        // UP ボタンが押された場合の番号設定
 		iSelectNo01 = iAddNumber(iSelectNo01, cSW2_ON(), eModeS1_ModeSelect_jmp_wave_play, eModeS1_ModeSelect_jmp_Chime_Disable);
+        // DOWN ボタンが押された場合の番号設定
 		iSelectNo01 = iSubNumber(iSelectNo01, cSW3_ON(), eModeS1_ModeSelect_jmp_wave_play, eModeS1_ModeSelect_jmp_Chime_Disable);
 
 		switch(iSelectNo01){
@@ -384,13 +381,13 @@ void vModeSwitchControl00(void)
 		break;
 	case	eModeS1_ModeSelect_jmp_Chime_Enable:
 		vSetChimeIndexs();					// 次の時報を設定する
-//		RtccAlarmEnable();					// enable the alarm
 		eModeSwitchStatus1 = eModeS1_clock;
 		break;
 	case	eModeS1_ModeSelect_jmp_Chime_Disable:
 		vSetChimeOFF();
-//		RtccAlarmDisable();					// disable the alarm
 		eModeSwitchStatus1 = eModeS1_clock;
+		break;
+	default:
 		break;
 	}
 
@@ -558,10 +555,8 @@ void vModeSwitchControl01(void)
 		eModeSwitchStatus1 = eModeS1_clock;
 		break;
 
-
-
-//	default:
-//		eModeSwitchStatus1 = eModeS1_clock;
+	default:
+		break;
 	}
 
 
@@ -587,6 +582,8 @@ void vModeSwitchControl02(void)
 	case  	eModeS1_search_music_pre :
 		vWAVE_close();						//stop WAVE playing
 		CloseTimer4();						//stop SD card reading
+
+    	SD_POWER_EN();
 		vPut_rc(pf_mount(&fs));
 		vPut_rc(pf_mount(&fs));
 		eModeSwitchStatus1++;
@@ -619,11 +616,6 @@ void vModeSwitchControl02(void)
 			iMusicNo--;
 			eModeSwitchStatus1 = eModeS1_search_music_dir;
 		}
-//		if(cSW4_ON()){	// stop music
-//			vWAVE_close();				//stop WAVE playing
-//			CloseTimer4();				//stop SD card reading
-//			eModeSwitchStatus1 = eModeS1_clock;
-//		}
 		//music play の終了を判断し、終了したならば次のmusicをサーチして演奏する。
 		switch (eWaveStatusC3) {
 		case  	eWaveC3_idle:
@@ -634,6 +626,15 @@ void vModeSwitchControl02(void)
 		default:
 			break;
 		}
+        break;
+        
+	case  	eModeS1_repeat_music :
+		//music play 中に、Mode/Menu swが押された時の処理
+        eModeSwitchStatus1 = eModeS1_play_music;
+        break;
+        
+	default:
+		break;
 	}
 
 }
@@ -642,22 +643,22 @@ void vModeSwitchControl02(void)
 //   Add Number and return
 //
 //   Description   : 時刻日付の設定用。
-//                 : 時間を受け取り、指定の範囲で加算して返信する。
-//                 : 時間を加算した結果が、指定範囲を超えていた場合は最小値を返す。
+//                 : 時間・番号を受け取り、指定の範囲で加算して返信する。
+//                 : 時間・番号を加算した結果が、指定範囲を超えていた場合は最小値を返す。
 //   Precondition  :
-//   Input         : iNowTime:加算する元
-//                 : iAddTime:加算値
-//                 : iMinTime:指定の範囲、最小値
-//                 : iMaxTime:指定の範囲、最大値
+//   Input         : iNowNumber:加算する元
+//                 : iAddNumber:加算値
+//                 : iMinNumber:指定の範囲、最小値
+//                 : iMaxNumber:指定の範囲、最大値
 //   Output        : 算出した値
 //******************************************************************************
-int iAddNumber(int iNowTime, int iAddTime, int iMinTime, int iMaxTime)
+int iAddNumber(int iNowNumber, int iAddNumber, int iMinNumber, int iMaxNumber)
 {
-	iNowTime = iNowTime + iAddTime;
-	if(iNowTime > iMaxTime){
-		return iMinTime;
+	iNowNumber = iNowNumber + iAddNumber;
+	if(iNowNumber > iMaxNumber){
+		return iMinNumber;
 	}else{
-		return iNowTime;
+		return iNowNumber;
 	}
 
 }
@@ -666,22 +667,22 @@ int iAddNumber(int iNowTime, int iAddTime, int iMinTime, int iMaxTime)
 //   Subtract Number and return
 //
 //   Description   : 時刻日付の設定用。
-//                 : 時間を受け取り、指定の範囲で減算して返信する。
-//                 : 時間を減算した結果が、指定範囲を超えていた場合は最大値を返す。
+//                 : 時間・番号を受け取り、指定の範囲で減算して返信する。
+//                 : 時間・番号を減算した結果が、指定範囲を超えていた場合は最大値を返す。
 //   Precondition  :
-//   Input         : iNowTime:減算する元
-//                 : iAddTime:減算値
-//                 : iMinTime:指定の範囲、最小値
-//                 : iMaxTime:指定の範囲、最大値
+//   Input         : iNowNumber:減算する元
+//                 : iAddNumber:減算値
+//                 : iMinNumber:指定の範囲、最小値
+//                 : iMaxNumber:指定の範囲、最大値
 //   Output        : 算出した値
 //******************************************************************************
-int iSubNumber(int iNowTime, int iSubTime, int iMinTime, int iMaxTime)
+int iSubNumber(int iNowNumber, int iSubNumber, int iMinNumber, int iMaxNumber)
 {
-	iNowTime = iNowTime - iSubTime;
-	if(iNowTime < iSubTime){
-		return iMaxTime;
+	iNowNumber = iNowNumber - iSubNumber;
+	if(iNowNumber < iMinNumber){
+		return iMaxNumber;
 	}else{
-		return iNowTime;
+		return iNowNumber;
 	}
 }
 
@@ -698,17 +699,17 @@ int iSubNumber(int iNowTime, int iSubTime, int iMinTime, int iMaxTime)
 //******************************************************************************
 void vPowerSave(void)
 {
-	if((eWaveStatusC3 == eWaveC3_idle) && (eModeSwitchStatus1 == eModeS1_clock)) {
-		SD_POWER_DISEN();
+        CloseTimer4();				//stop SD card reading
 		AUDIO_DISEN();
-
+		SD_POWER_DISEN();
+        vTIMER1_close();
 	//	RCONbits.BOR = 0;
 
 		PowerSaveSleep();
 	//	PowerSaveIdle();
 
-		SD_POWER_EN();
+        vTIMER1_init();
+    //	SD_POWER_EN();
 	//	AUDIO_EN();
-	}
 
 }

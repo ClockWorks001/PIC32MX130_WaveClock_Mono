@@ -33,12 +33,22 @@ void __ISR(_RTCC_VECTOR, ipl3) Intrupt_RTCC(void){
  * initialization
  *****************************/
 void vRTCC_init(void) {
-	//rtccTime	tm;	//ファンクション用のrtccTime変数を定義 Peripheral Library 参照
-	//rtccDate	dt;	//ファンクション用のrtccDate変数を定義 Peripheral Library 参照
+	rtccTime	tm;	//ファンクション用のrtccTime変数を定義 Peripheral Library 参照
+	rtccDate	dt;	//ファンクション用のrtccDate変数を定義 Peripheral Library 参照
 	// Setup RTCC
 	vGetsRTCC();
-	if (ucHour > 23) {
-		RtccOpen(0x00000000,0x09100804,0);
+	if ((ucHour > 23) || (ucMonth > 12) || (ucDay > 31))  {
+        tm.l = 0;
+        tm.sec = 0x00;
+        tm.min = 0x00;
+        tm.hour = 0x20;
+        dt.l = 0;
+        dt.wday = 6;
+        dt.mday = 0x25;
+        dt.mon = 0x11;
+        dt.year = 0x16;
+//		RtccOpen(0x00000000,0x09100804,0);
+		RtccOpen(tm.l, dt.l ,0);
 	}
 	RtccInit();				// init the RTCC
 	while(RtccGetClkStat()!=RTCC_CLK_ON);	// wait for the SOSC to be actually running and RTCC to have its clock source
@@ -199,7 +209,7 @@ void vCheckChimeIndexs(void) {
 	static BYTE bChimeMessage[125];
 	BYTE bTime[5];
 	BYTE *bChimeMessage_ptr = bChimeMessage;
-
+    
 	vGetsRTCC();			// RTCCモジュールから日付時間を取得する。
 	xsprintf(bTime, "%02d%02d", ucHour, ucMin);
 	xprintf( "\n\rTime is %s", bTime);

@@ -292,6 +292,7 @@ void vCommand_FatFs(void) {
 	ucPtr1 = &cCmdBuf[2];
 	switch(cCmdBuf[1]) {
 	case 'i' :	/* fi - Mount the volume */
+    	SD_POWER_EN();
 		vPut_rc(pf_mount(&fs));
 		vPut_rc(pf_mount(&fs));
 		break;

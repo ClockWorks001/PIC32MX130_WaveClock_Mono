@@ -447,6 +447,8 @@ BYTE bSearchListAndGetFileName(BYTE *pListIndex, BYTE *pListName, BYTE **pReturn
 	
 	//----------------------------------------------------------------------
 	// fi - Mount the volume //
+	SD_POWER_EN();
+	res = pf_mount(&fs);
 	res = pf_mount(&fs);
 	if (res != FR_OK) {
 		vPut_rc(res);
@@ -630,6 +632,8 @@ void vWavePlayControl01(void) {
 
 	case  	eWaveC3_FileSystemOpen :
 		// fi - Mount the volume //
+    	SD_POWER_EN();
+		res = pf_mount(&fs);
 		res = pf_mount(&fs);
 //		if (res != FR_OK) {
 			vPut_rc(res);
@@ -667,21 +671,24 @@ void vWavePlayControl01(void) {
 		break;
 
 	case  	eWaveC3_busy :
-//		AUDIO_EN();
-		if(SdFF.iWaveBusy) break;			//wait until idle
-		eWaveStatusC3++;					//モードを次のステータスへ遷移
-		AUDIO_DISEN();
-		break;
-
+		if(SdFF.iWaveBusy) {
+            break;			//wait until idle
+        } else { 
+            eWaveStatusC3++;					//モードを次のステータスへ遷移
+            AUDIO_DISEN();
+            break;
+        }
 	case  	eWaveC3_next :
 		while (*bWaveFileName_ptr != ' ' && *bWaveFileName_ptr != '\0') bWaveFileName_ptr++;	//次の曲・フレーズへ
 		eWaveStatusC3 = eWaveC3_NameCheck;
 		break;
 
 	case  	eWaveC3_end :
-		xputs("\r\nEND WAVE PLAY\r\n>");
+//		xputs("\r\nEND WAVE PLAY\r\n>");
 		vWAVE_close();						//stop WAVE playing
 		CloseTimer4();						//stop SD card reading
+//      AUDIO_DISEN();
+//		SD_POWER_DISEN();
 		eWaveStatusC3 = eWaveC3_idle;		//モードを次のステータスへ遷移
 		break;
 

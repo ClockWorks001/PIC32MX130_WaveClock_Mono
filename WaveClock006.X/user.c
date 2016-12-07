@@ -39,6 +39,7 @@
 
 void InitApp(void)
 {
+    DisableWDT(); 
 
 	//unsigned int pll_startup_counter = 100;
 	//while(pll_startup_counter--);
@@ -64,7 +65,7 @@ void InitApp(void)
 
 	vTIMER1_init();
 	
-//	vUSART_menu_init();
+	vUSART_menu_init();
 	vRTCC_init();
 	
 	vWait_100ms(3);
@@ -101,11 +102,10 @@ void InitApp(void)
 
 	//pFatFs////////////////////////////////////////////////////////////////////
 
+    eModeSwitchStatus1 = eModeS1_clock; // Switch Menu clear
+    eWaveStatusC3 = eWaveC3_idle;       // Wave Control clear
+
 }
-
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 
 
 //*****************************************************************************
@@ -121,42 +121,70 @@ void user_main(void) {
 //	LED0 = 1;						//LEDを点灯
 	//	xprintf("Test Start!\r\n");	//開始のメッセージ
 
+    ClearEventWDT();
+    EnableWDT(); // enable the WDT
+
 	while(1) {
+        ClearWDT(); // service the WDT
 		if(cFlag10mSec) {
 			cFlag10mSec = 0;
 			vSW2_Check();
 			vSW1_Check();
 			vSW3_Check();
 			vSW4_Check();
-			vModeSwitchControl00();		// Switch Main Menu control
-			vModeSwitchControl01();		// Time set Menu control
-			vModeSwitchControl02();		// Wave Play Menu control
-//			vModeUartControl11();		// UART Menu contorol
-			vWavePlayControl01();		// Wave Play status control
-			
+            if (cSW4_ON()){ // cancel
+                eModeSwitchStatus1 = eModeS1_end;
+            }
+            if (eModeSwitchStatus1 < eModeS1_Time_set_pre){
+                // Switch Main Menu control
+    			vModeSwitchControl00();		
+            } else if(eModeSwitchStatus1 < eModeS1_search_music_pre){
+                // Time & Date set Menu control
+    			vModeSwitchControl01();		
+            } else if(eModeSwitchStatus1 < eModeS1_end){
+                // Wave Play Menu control
+    			vModeSwitchControl02();		
+            } else {
+                // Menu end
+                vWAVE_close();				//stop WAVE playing
+                CloseTimer4();				//stop SD card reading
+                AUDIO_DISEN();
+                SD_POWER_DISEN();
+                eModeSwitchStatus1 = eModeS1_clock;
+            }
+            if((eWaveStatusC3 == eWaveC3_idle) && (eModeSwitchStatus1 == eModeS1_clock)) {
+    			vModeLcdControl01();			//lcd表示タスク
+                DisableWDT(); 
+                vPowerSave();
+//                ClearEventWDT();
+                EnableWDT(); // enable the WDT
+            }
 		}
+
 		if(cFlagSec05) {
 			cFlagSec05 = 0;
 			vModeLcdControl01();			//lcd表示タスク
 		}
-		if(cFlag1Minute) {
-			cFlag1Minute = 0;
-			vCheckChimeIndexs();			//毎分毎のチャイムチェック
-			vModeLcdControl01();			//lcd表示タスク
-		}
-
 
 		if(cFlagSec) {
 			cFlagSec = 0;
-			vModeLcdControl01();			//lcd表示タスク
-			vPowerSave();
+//			vModeLcdControl01();			//lcd表示タスク
+//			vPowerSave();
 
 //			LED0 = ~LED0;
 //			LED1 = ~LED0;
 		}
+            
+		if(cFlag1Minute) {
+			cFlag1Minute = 0;
+            if((eModeSwitchStatus1 == eModeS1_clock) || (eModeSwitchStatus1 >= eModeS1_search_music_pre)) {
+                vCheckChimeIndexs();			//毎分毎のチャイムチェック
+                vModeLcdControl01();			//lcd表示タスク
+            }
+		}
 
-
+//		vModeUartControl11();		// UART Menu contorol
+		vWavePlayControl01();		// Wave Play status control
 		
-
 	}
 }

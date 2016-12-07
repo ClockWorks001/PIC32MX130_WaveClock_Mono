@@ -33,10 +33,11 @@
 #pragma config OSCIOFNC  = OFF		//CLKO Output Signal Active on the OSCO Pin::disabled
 #pragma config FPBDIV    = DIV_1	//Peripheral Clock Divisor:Pb_Clk is Sys_Clk/1 (DIV_1,DIV_2,DIV_4,DIV_8)
 #pragma config FCKSM     = CSECMD	//Clock Switching and Monitor Selection:Clock Switch Disable, FSCM Disabled (CSECME,CSECMD,CSDCMD)
-#pragma config WDTPS     = PS1		//Watchdog Timer Postscaler:1:1 (PS1,,,,PS1048576)
+//#pragma config WDTPS     = PS1024		//Watchdog Timer Postscaler:1:1 (PS1,,,,PS1048576)
+#pragma config WDTPS     = PS2048	//Watchdog Timer Postscaler:1:1 (PS1,,,,PS1048576)
 #pragma config WINDIS    = OFF		//Watchdog Timer Window Enable:Watchdog Timer is in Non-Window Mode
 #pragma config FWDTEN    = OFF		//Watchdog Timer Enable:WDT Disabled (SWDTEN Bit Controls)
-#pragma config FWDTWINSZ = WINSZ_50	//Watchdog Timer Window Size:Window Size is 50% (WINSZ_75,WINSZ_50,WINSZ_37,WISZ_25)
+#pragma config FWDTWINSZ = WISZ_25	//Watchdog Timer Window Size:Window Size is 50% (WINSZ_75,WINSZ_50,WINSZ_37,WISZ_25)
 #pragma config DEBUG     = OFF		//Background Debugger Enable:Debugger is Disabled
 #pragma config JTAGEN    = OFF		//JTAG Enable:JTAG Disabled
 #pragma config ICESEL	 = ICS_PGx1	//ICE/ICD Comm Channel Select:Reserved (RESERVED,ICS_PGx3,ICS_PGx2,ICS_PGx1)

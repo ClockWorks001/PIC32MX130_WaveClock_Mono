@@ -17,18 +17,10 @@
 #define SWITCH_OFF		0
 #define FILE_NAME_BUFFER_SIZE 30			//File Name buffer size
 
+
 /*****************************
 ** 定数変数定義
 *****************************/
-#if defined SWITCH_MENU_LIB
-	char cSW2_flag = 0;		// global変数はstaticは、要らない
-	char cSW3_flag = 0;		// global変数はstaticは、要らない
-	char cSW4_flag = 0;		// global変数はstaticは、要らない
-	int iSelectNo01;		// 制御selectする場合の番号保持用
-
-	BYTE bFileName_buff[FILE_NAME_BUFFER_SIZE + 1];	//File Name buffer
-	unsigned char ucMin02, ucHour02;	//時刻設定用
-
 	enum eModeS1 {
 		eModeS1_clock,			// idle
 
@@ -66,18 +58,28 @@
 		eModeS1_search_music_pre,
 		eModeS1_search_music_dir,
 		eModeS1_play_music,
+		eModeS1_repeat_music,
 
 		// other control
-		eModeS1_sleep,
-		eModeS1_beep,
+		//eModeS1_sleep,
 
 		eModeS1_end
 	};
-	enum eModeS1 eModeSwitchStatus1;
 
+#if defined SWITCH_MENU_LIB
+	char cSW2_flag = 0;		// global変数はstaticは、要らない
+	char cSW3_flag = 0;		// global変数はstaticは、要らない
+	char cSW4_flag = 0;		// global変数はstaticは、要らない
+	int iSelectNo01;		// 制御selectする場合の番号保持用
+
+	BYTE bFileName_buff[FILE_NAME_BUFFER_SIZE + 1];	//File Name buffer
+	unsigned char ucMin02, ucHour02;	//時刻設定用
+
+	enum eModeS1 eModeSwitchStatus1;
 
 #else
 	//extern char ucTestCount = 0;
+	extern enum eModeS1 eModeSwitchStatus1;
 #endif
 
 
@@ -100,8 +102,8 @@ void vModeSwitchControl00(void);
 void vModeSwitchControl01(void);
 void vModeSwitchControl02(void);
 
-int iAddNumber(int iNowTime, int iAddTime, int iMinTime, int iMaxTime);
-int iSubNumber(int iNowTime, int iSubTime, int iMinTime, int iMaxTime);
+int iAddNumber(int iNowNumber, int iAddNumber, int iMinNumber, int iMaxNumber);
+int iSubNumber(int iNowNumber, int iSubNumber, int iMinNumber, int iMaxNumber);
 void vPowerSave(void);
 
 
