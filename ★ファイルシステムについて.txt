@@ -1,0 +1,6 @@
+﻿このプロジェクトのファイルシステムは、ChaN氏のPetitFATを利用させていただいています。
+
+ChaN氏(http://elm-chan.org/index_j.html)
+PetitFAT(http://elm-chan.org/fsw/ff/00index_p.html)
+
+使用するmicroSDカードはFat32でフォーマットされたものご御使用ください。
