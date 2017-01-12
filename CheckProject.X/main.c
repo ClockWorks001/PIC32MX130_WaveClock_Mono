@@ -74,7 +74,7 @@ int main(void)
     {
         // Add your application code
         
-        if(FLAG_iTMR001){
+        if(FLAG_uiTMR001){
             uiTMR001 = 1000; //1000msec period
             LED1_Toggle(); 
         }
